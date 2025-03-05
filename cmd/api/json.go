@@ -8,6 +8,9 @@ import (
 func writeJSON(w http.ResponseWriter, status int, data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
+	// The data received from health.go is a Map althiugh we have specified as
+	// any format. It need to be converted to JSON before writing in
+	// the response body
 	return json.NewEncoder(w).Encode(data)
 }
 
@@ -21,6 +24,9 @@ func readJSON(w http.ResponseWriter, r *http.Request, data any) error {
 }
 
 func writeJSONError(w http.ResponseWriter, status int, message string) error {
+	// A function to present the error message String as JSON
+	// by adding it as a String value to a "Error" key in a JSON
+	// key-value pair
 	type envelope struct {
 		Error string `json:"error"`
 	}
