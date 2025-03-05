@@ -10,6 +10,9 @@ import (
 
 // Entry point for the application
 // Executable for the cmd folder
+
+const version = "0.0.1"
+
 func main() {
 
 	cfg := config{
