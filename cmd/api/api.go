@@ -10,17 +10,23 @@ import (
 	"github.com/wadiya/go-social/internal/store"
 )
 
+// Define structure for application
+// It should include configuration and storage
+
 type application struct {
 	config config
 	store  store.Storage
 }
 
+// Define structure for capplication onfig
+// It should include address, database configuration (defined separately) and environment
 type config struct {
 	addr string
 	db   dbConfig
 	env  string
 }
 
+// Define structure for database configuration
 type dbConfig struct {
 	addr         string
 	maxOpenConns int
@@ -28,6 +34,8 @@ type dbConfig struct {
 	maxIdleTime  string
 }
 
+// Define a mount() function for pointer to application struct
+// It must return an http handler
 func (app *application) mount() http.Handler {
 
 	r := chi.NewRouter()
@@ -42,13 +50,18 @@ func (app *application) mount() http.Handler {
 
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.createPostHandler)
+
+			r.Route("/{postID}", func(r chi.Router) {
+				r.Get("/", app.getPostHandler)
+			})
 		})
 	})
-
+	// Return the router http handler
 	return r
 }
 func (app *application) run(mux http.Handler) error {
 
+	// Create a http server using the http Server strucure
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      mux,
@@ -58,6 +71,6 @@ func (app *application) run(mux http.Handler) error {
 	}
 
 	log.Printf("server has started at %s", app.config.addr)
-
+	// Start the server to listen on the port and serve the traffic
 	return srv.ListenAndServe()
 }

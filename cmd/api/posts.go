@@ -44,3 +44,26 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 	}
 
 }
+
+// *Applications invokes getPostHandler
+
+func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
+	// Dummmy postID
+
+	var postID int64 = 2
+
+	// Get the context from the request
+
+	ctx := r.Context()
+
+	// Retrieve the post from the Posts table from the store
+	// created from the app
+	post, err := app.store.Posts.GetById(ctx, postID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	} else {
+		writeJSON(w, http.StatusOK, post)
+		return
+	}
+}

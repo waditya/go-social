@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	"github.com/wadiya/go-social/internal/store"
 )
 
 // Specify the model for Post
@@ -20,7 +21,7 @@ type Post struct {
 }
 
 type PostStore struct {
-	db *sql.DB
+	db *sql.DB //Pointer to database connection
 }
 
 func (s *PostStore) Create(ctx context.Context, post *Post) error {
@@ -47,4 +48,30 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	}
 
 	return nil
+}
+
+func (s *PostStore) GetById(ctx context.Context, postID int64) (Post, error) {
+	post := &store.Post{
+		ID: postID,
+	}
+	query := `
+	SELECT * FROM posts WHERE ID=?
+	`
+	err := s.db.QueryRowContext(
+		ctx,
+		query,
+		post.ID,
+	).Scan(
+		&post.Content,
+		&post.Title,
+		&post.UserID,
+		&post.Tags,
+		&post.CreatedAt,
+		&post.UpdateAt,
+	)
+
+	if err != nil {
+		return post, err
+	}
+	return post, nil
 }

@@ -27,6 +27,6 @@ func New(addr string, maxOpenConns int, maxIdleConns int, maxIdleTime string) (*
 	if err := db.PingContext(ctx); err != nil {
 		return nil, err
 	}
-
+	// Return pointer to a SQL database connection
 	return db, nil
 }

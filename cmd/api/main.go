@@ -25,6 +25,7 @@ func main() {
 		},
 	}
 
+	// Use the New function in db package to open a dataabase connection
 	db, err := db.New(
 		cfg.db.addr,
 		cfg.db.maxOpenConns,
@@ -41,6 +42,7 @@ func main() {
 
 	store := store.NewStorage(db)
 
+	// app is a pointer to application struct
 	app := &application{
 		config: cfg,
 		store:  store,
