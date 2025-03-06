@@ -3,15 +3,20 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 )
 
 // The Storage Strut represents tables
 // We create separate interface for each table - Posts and Users
 
+var (
+	ErrNotFound = errors.New("Result not found")
+)
+
 type Storage struct {
 	Posts interface {
 		Create(context.Context, *Post) error
-		GetById(context.Context, int64) (Post, error)
+		GetByID(context.Context, int64) (*Post, error)
 	}
 
 	Users interface {

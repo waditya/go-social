@@ -3,10 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/lib/pq"
-	"github.com/wadiya/go-social/internal/store"
 )
 
 // Specify the model for Post
@@ -50,28 +50,37 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	return nil
 }
 
-func (s *PostStore) GetById(ctx context.Context, postID int64) (Post, error) {
-	post := &store.Post{
-		ID: postID,
-	}
+func (s *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
+
 	query := `
-	SELECT * FROM posts WHERE ID=?
+	SELECT id, title, user_id, content, created_at, updated_at, tags 
+	FROM posts 
+	WHERE ID=$1
 	`
+
+	var post Post
+
 	err := s.db.QueryRowContext(
 		ctx,
 		query,
-		post.ID,
+		postID,
 	).Scan(
-		&post.Content,
+		&post.ID,
 		&post.Title,
 		&post.UserID,
-		&post.Tags,
+		&post.Content,
 		&post.CreatedAt,
 		&post.UpdateAt,
+		pq.Array(post.Tags),
 	)
 
 	if err != nil {
-		return post, err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
 	}
-	return post, nil
+	return &post, nil
 }

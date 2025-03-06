@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/wadiya/go-social/internal/store"
 )
 
@@ -52,15 +55,31 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	var postID int64 = 2
 
+	// Extract URLParam to get postID
+
+	idParam := chi.URLParam(r, "postID")
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	// Get the context from the request
 
 	ctx := r.Context()
 
 	// Retrieve the post from the Posts table from the store
 	// created from the app
-	post, err := app.store.Posts.GetById(ctx, postID)
+	post, err := app.store.Posts.GetByID(ctx, id)
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			writeJSONError(w, http.StatusNotFound, err.Error())
+		default:
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	} else {
 		writeJSON(w, http.StatusOK, post)
