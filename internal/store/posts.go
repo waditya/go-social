@@ -71,7 +71,7 @@ func (s *PostStore) GetByID(ctx context.Context, postID int64) (*Post, error) {
 		&post.Content,
 		&post.CreatedAt,
 		&post.UpdateAt,
-		pq.Array(post.Tags),
+		pq.Array(&post.Tags), // Unmarshalling Slice
 	)
 
 	if err != nil {
