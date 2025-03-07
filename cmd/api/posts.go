@@ -106,3 +106,52 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract URLParam to get postID
+
+	idParam := chi.URLParam(r, "postID") // Pass the request to chi library's URLParam method to get the postID to be deleted
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+
+	if err != nil {
+		app.internalServerError(w, r, err)
+		// writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Get the context from the request
+
+	ctx := r.Context()
+	if err := app.store.Comments.DeleteByPostID(ctx, id); err != nil {
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			app.notFoundResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if err := app.store.Posts.DeleteByID(ctx, id); err != nil {
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			app.notFoundResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+
+}
+
+func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
+
+}

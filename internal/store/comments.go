@@ -50,3 +50,25 @@ func (s *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]Comment
 
 	return comments, nil
 }
+
+func (s *CommentStore) DeleteByPostID(ctx context.Context, postID int64) error {
+	query := `
+	DELETE FROM comments c
+	WHERE c.post_id = $1
+	`
+
+	result, err := s.db.ExecContext(ctx, query, postID)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	// There can be posts with 0 comments.
+	if rows == 0 {
+		return nil
+	}
+
+	return nil
+
+}
