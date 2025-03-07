@@ -22,13 +22,18 @@ type Storage struct {
 	Users interface {
 		Create(context.Context, *User) error
 	}
+
+	Comments interface {
+		GetByPostID(ctx context.Context, postID int64) ([]Comment, error)
+	}
 }
 
 // Method in Storage Package which returns Storage Structure
 // or the tables
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
-		Posts: &PostStore{db},
-		Users: &UsersStore{db},
+		Posts:    &PostStore{db},
+		Users:    &UserStore{db},
+		Comments: &CommentStore{db},
 	}
 }
