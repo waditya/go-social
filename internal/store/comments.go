@@ -26,6 +26,9 @@ func (s *CommentStore) GetByPostID(ctx context.Context, postID int64) ([]Comment
 		ORDER BY c.created_at DESC;
 	`
 
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
+
 	rows, err := s.db.QueryContext(ctx, query, postID)
 
 	if err != nil {
@@ -56,6 +59,9 @@ func (s *CommentStore) DeleteByPostID(ctx context.Context, postID int64) error {
 	DELETE FROM comments c
 	WHERE c.post_id = $1
 	`
+
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
+	defer cancel()
 
 	result, err := s.db.ExecContext(ctx, query, postID)
 

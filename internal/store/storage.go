@@ -4,13 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 )
 
 // The Storage Strut represents tables
 // We create separate interface for each table - Posts and Users
 
 var (
-	ErrNotFound = errors.New("Result not found")
+	ErrNotFound          = errors.New("Result not found")
+	QueryTimeoutDuration = time.Second * 5
 )
 
 type Storage struct {
