@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-
 	"github.com/wadiya/go-social/internal/db"
 	"github.com/wadiya/go-social/internal/env"
 	"github.com/wadiya/go-social/internal/store"
+	"go.uber.org/zap"
 )
 
 // Entry point for the application
@@ -42,7 +41,11 @@ func main() {
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
 	}
+	// Logger
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
 
+	//Database
 	// Use the New function in db package to open a dataabase connection
 	db, err := db.New(
 		cfg.db.addr,
@@ -52,11 +55,11 @@ func main() {
 	)
 
 	if err != nil {
-		log.Panic(err)
+		logger.Fatal(err)
 	}
 
 	defer db.Close()
-	log.Println("Database connection pool established.")
+	logger.Info("Database connection pool established.")
 
 	store := store.NewStorage(db)
 
@@ -64,9 +67,10 @@ func main() {
 	app := &application{
 		config: cfg,
 		store:  store,
+		logger: logger,
 	}
 
 	mux := app.mount()
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 
 }
