@@ -44,7 +44,28 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		// },
 	}
 
+	// Get the context from the request
+
+	ctx := r.Context()
 	// store the user
+	err := app.store.Users.CreateAndInvite(ctx, user, "asdbsahbcb", app.config.mail.exp)
+
+	if err != nil {
+		switch err {
+		case store.ErrDuplicateEmail:
+			app.badRequestResponse(w, r, err)
+		case store.ErrorDuplicateUsername:
+			app.badRequestResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
+	}
+
+	// mail
+
+	if err := app.jsonResponse(w, http.StatusCreated, nil); err != nil {
+		app.internalServerError(w, r, err)
+	}
 
 	// hash the user password. Password is never stored in plain text
 
