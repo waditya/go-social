@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/wadiya/go-social/internal/store"
 )
 
@@ -10,6 +13,11 @@ type RegisterUserPayload struct {
 	Username string `json:"username" validate:"required,max=100"`
 	Email    string `json:"email" validate:"required,email,max=255"`
 	Password string `json:"password" validate:"required,min=3,max=72"`
+}
+
+type UserWithToken struct {
+	*store.User
+	Token string `json:"token"`
 }
 
 // registerUserHandler godoc
@@ -47,8 +55,15 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	// Get the context from the request
 
 	ctx := r.Context()
+
+	plainToken := uuid.New().String()
+
+	// store the token encrypted
+	hash := sha256.Sum256([]byte(plainToken))
+
+	hashToken := hex.EncodeToString(hash[:])
 	// store the user
-	err := app.store.Users.CreateAndInvite(ctx, user, "asdbsahbcb", app.config.mail.exp)
+	err := app.store.Users.CreateAndInvite(ctx, user, hashToken, app.config.mail.exp)
 
 	if err != nil {
 		switch err {
@@ -61,9 +76,14 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
+	userWithToken := UserWithToken{
+		User:  user,
+		Token: plainToken,
+	}
+
 	// mail
 
-	if err := app.jsonResponse(w, http.StatusCreated, nil); err != nil {
+	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)
 	}
 

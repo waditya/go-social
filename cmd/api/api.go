@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/wadiya/go-social/docs" // This is required to geb
+	"github.com/wadiya/go-social/internal/mailer"
 	"github.com/wadiya/go-social/internal/store"
 )
 
@@ -21,6 +22,7 @@ type application struct {
 	config config
 	store  store.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 // Define structure for capplication onfig
@@ -79,6 +81,7 @@ func (app *application) mount() http.Handler {
 		// User Route
 
 		r.Route("/users", func(r chi.Router) {
+			r.Put("/activate/{token}", app.activateUserHandler)
 			r.Route("/{userID}", func(r chi.Router) {
 				r.Use(app.usersContextMiddleware)
 				r.Get("/", app.getUserHandler)
@@ -90,12 +93,11 @@ func (app *application) mount() http.Handler {
 			r.Group(func(r chi.Router) {
 				r.Get("/feed", app.getUserFeedHandler)
 			})
+		})
 
-			// Public routes
-			r.Route("/authentication", func(r chi.Router) {
-				r.Post("/user", app.registerUserHandler)
-			})
-
+		// Public routes
+		r.Route("/authentication", func(r chi.Router) {
+			r.Post("/user", app.registerUserHandler)
 		})
 	})
 	// Return the router http handler
