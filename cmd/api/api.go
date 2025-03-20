@@ -36,7 +36,18 @@ type config struct {
 }
 
 type mailConfig struct {
-	exp time.Duration
+	sendGrid  sendGridConfig
+	mailTrap  mailTrapConfig
+	fromEmail string
+	exp       time.Duration
+}
+
+type mailTrapConfig struct {
+	apiKey string
+}
+
+type sendGridConfig struct {
+	apiKey string
 }
 
 // Define structure for database configuration

@@ -5,6 +5,7 @@ import (
 
 	"github.com/wadiya/go-social/internal/db"
 	"github.com/wadiya/go-social/internal/env"
+	"github.com/wadiya/go-social/internal/mailer"
 	"github.com/wadiya/go-social/internal/store"
 	"go.uber.org/zap"
 )
@@ -44,7 +45,14 @@ func main() {
 		},
 		env: env.GetString("ENV", "development"),
 		mail: mailConfig{
-			exp: time.Hour * 24 * 3, // 3 days
+			exp:       time.Hour * 24 * 3, // 3 days
+			fromEmail: env.GetString("FROM_EMAIL", ""),
+			sendGrid: sendGridConfig{
+				apiKey: env.GetString("SENDGRID_API_KEY", ""),
+			},
+			mailTrap: mailTrapConfig{
+				apiKey: env.GetString("MAILTRAP_API_KEY", ""),
+			},
 		},
 	}
 	// Logger
@@ -67,6 +75,14 @@ func main() {
 	defer db.Close()
 	logger.Info("Database connection pool established.")
 
+	// Mailer
+	// Mailer
+	// mailer := mailer.NewSendgrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+	mailtrap, err := mailer.NewMailTrapClient(cfg.mail.mailTrap.apiKey, cfg.mail.fromEmail)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	store := store.NewStorage(db)
 
 	// app is a pointer to application struct
@@ -74,6 +90,7 @@ func main() {
 		config: cfg,
 		store:  store,
 		logger: logger,
+		mailer: mailtrap,
 	}
 
 	mux := app.mount()
