@@ -22,3 +22,9 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request,
 	app.logger.Warnf("not found error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
 	writeJSONError(w, http.StatusNotFound, err.Error())
 }
+
+func (app *application) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logger.Warnf("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
+
+	writeJSON(w, http.StatusNotFound, "unauthorized")
+}
