@@ -3,10 +3,12 @@ package main
 import (
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/wadiya/go-social/internal/db"
 	"github.com/wadiya/go-social/internal/env"
 	"github.com/wadiya/go-social/internal/mailer"
 	"github.com/wadiya/go-social/internal/store"
+	"github.com/wadiya/go-social/internal/store/cache"
 	"go.uber.org/zap"
 )
 
@@ -55,6 +57,17 @@ func main() {
 				apiKey: env.GetString("MAILTRAP_API_KEY", ""),
 			},
 		},
+		auth: authConfig{
+			basic: basicConfig{
+				user: env.GetString("AUTH_BASIC_USER", "admin"),
+				pass: env.GetString("AUTH_BASIC_PASS", "admin"),
+			},
+			token: tokenConfig{
+				secret: env.GetString("AUTH_TOKEN_SECRET", "example"),
+				exp:    time.Hour * 24 * 3, // 3 days
+				iss:    "gosocial",
+			},
+		},
 	}
 	// Logger
 	logger := zap.Must(zap.NewProduction()).Sugar()
@@ -75,6 +88,15 @@ func main() {
 
 	defer db.Close()
 	logger.Info("Database connection pool established.")
+
+	// Cache
+	var rdb *redis.Client
+	if cfg.redisCfg.enabled {
+		rdb = cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
+		logger.Info("redis cache connection established")
+
+		defer rdb.Close()
+	}
 
 	// Mailer
 	// Mailer

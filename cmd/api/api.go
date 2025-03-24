@@ -12,19 +12,23 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/wadiya/go-social/docs" // This is required to geb
+	"github.com/wadiya/go-social/internal/auth"
 	"github.com/wadiya/go-social/internal/env"
 	"github.com/wadiya/go-social/internal/mailer"
 	"github.com/wadiya/go-social/internal/store"
+	"github.com/wadiya/go-social/internal/store/cache"
 )
 
 // Define structure for application
 // It should include configuration and storage
 
 type application struct {
-	config config
-	store  store.Storage
-	logger *zap.SugaredLogger
-	mailer mailer.Client
+	config        config
+	store         store.Storage
+	logger        *zap.SugaredLogger
+	cacheStorage  cache.Storage
+	mailer        mailer.Client
+	authenticator auth.Authenticator
 }
 
 // Define structure for capplication onfig
@@ -37,10 +41,25 @@ type config struct {
 	mail        mailConfig
 	frontendURL string
 	auth        authConfig
+	redisCfg    redisConfig
+}
+
+type redisConfig struct {
+	addr    string
+	pw      string
+	db      int
+	enabled bool
 }
 
 type authConfig struct {
 	basic basicConfig
+	token tokenConfig
+}
+
+type tokenConfig struct {
+	secret string
+	exp    time.Duration
+	iss    string
 }
 
 type basicConfig struct {
@@ -91,7 +110,8 @@ func (app *application) mount() http.Handler {
 	}))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.Get("/health", app.healthCheckHandler)
+		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		// r.Get("/health", app.healthCheckHandler)
 
 		docsURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 
@@ -130,6 +150,7 @@ func (app *application) mount() http.Handler {
 		// Public routes
 		r.Route("/authentication", func(r chi.Router) {
 			r.Post("/user", app.registerUserHandler)
+			r.Post("/token", app.createTokenHandler)
 		})
 	})
 	// Return the router http handler
