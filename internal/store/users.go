@@ -44,6 +44,7 @@ func (p *password) Set(text string) error {
 	return nil
 }
 
+// Method of Password struct which hashes and compares password string
 func (p *password) Compare(text string) error {
 	return bcrypt.CompareHashAndPassword(p.hash, []byte(text))
 }
