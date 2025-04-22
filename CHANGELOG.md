@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/waditya/go-social/compare/v1.0.0...v1.1.0) (2025-04-22)
+
+
+### Features
+
+* update api version autmatically ([1c8de7e](https://github.com/waditya/go-social/commit/1c8de7eb4701bb3df2dbe1a1f9e8c42f17e75849))
+
 ## 1.0.0 (2025-04-22)
 
 
