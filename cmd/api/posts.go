@@ -16,7 +16,7 @@ const postCtx postKey = "post"
 
 type CreatePostPayload struct {
 	Title   string   `json:"title" validate:"required,min=5,max=100"`
-	Content string   `json:"content" validate:"required",min=5,max=1000`
+	Content string   `json:"content" validate:"required",min=5,max=1000"`
 	Tags    []string `json:"tags"`
 }
 
