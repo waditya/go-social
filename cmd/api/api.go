@@ -15,6 +15,7 @@ import (
 	"github.com/wadiya/go-social/internal/auth"
 	"github.com/wadiya/go-social/internal/env"
 	"github.com/wadiya/go-social/internal/mailer"
+	"github.com/wadiya/go-social/internal/ratelimiter"
 	"github.com/wadiya/go-social/internal/store"
 	"github.com/wadiya/go-social/internal/store/cache"
 )
