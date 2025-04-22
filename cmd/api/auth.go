@@ -71,7 +71,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		switch err {
 		case store.ErrDuplicateEmail:
 			app.badRequestResponse(w, r, err)
-		case store.ErrorDuplicateUsername:
+		case store.ErrDuplicateUsername:
 			app.badRequestResponse(w, r, err)
 		default:
 			app.internalServerError(w, r, err)
