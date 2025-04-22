@@ -43,6 +43,10 @@ type Storage struct {
 		Follow(ctx context.Context, followerId int64, userID int64) error
 		Unfollow(ctx context.Context, followerId int64, userID int64) error
 	}
+
+	Roles interface {
+		GetByName(context.Context, string) (*Role, error)
+	}
 }
 
 // Method in Storage Package which returns Storage Structure
