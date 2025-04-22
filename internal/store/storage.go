@@ -11,7 +11,7 @@ import (
 // We create separate interface for each table - Posts and Users
 
 var (
-	ErrNotFound          = errors.New("Result not found")
+	ErrNotFound          = errors.New("result not found")
 	ErrConflict          = errors.New("resource already exists")
 	QueryTimeoutDuration = time.Second * 5
 )

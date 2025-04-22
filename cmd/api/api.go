@@ -29,6 +29,7 @@ type application struct {
 	cacheStorage  cache.Storage
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	rateLimiter   ratelimiter.Limiter
 }
 
 // Define structure for capplication onfig
@@ -42,6 +43,7 @@ type config struct {
 	frontendURL string
 	auth        authConfig
 	redisCfg    redisConfig
+	rateLimiter ratelimiter.Config
 }
 
 type redisConfig struct {
@@ -108,6 +110,10 @@ func (app *application) mount() http.Handler {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
+	if app.config.rateLimiter.Enabled {
+		r.Use(app.RateLimiterMiddleware)
+	}
 
 	r.Route("/v1", func(r chi.Router) {
 		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)

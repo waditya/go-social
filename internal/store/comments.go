@@ -75,6 +75,10 @@ func (s *CommentStore) DeleteByPostID(ctx context.Context, postID int64) error {
 		return nil
 	}
 
+	if err != nil {
+		return err
+	}
+
 	return nil
 
 }
