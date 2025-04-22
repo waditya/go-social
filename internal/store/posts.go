@@ -118,6 +118,10 @@ func (s *PostStore) DeleteByID(ctx context.Context, postID int64) error {
 
 	rows, err := result.RowsAffected()
 
+	if err != nil {
+		return err
+	}
+
 	if rows == 0 {
 		return ErrNotFound
 	}

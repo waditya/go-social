@@ -60,5 +60,5 @@ func (app *application) getUserFeedHandler(w http.ResponseWriter, r *http.Reques
 	if err := app.jsonResponse(w, http.StatusOK, feed); err != nil {
 		app.internalServerError(w, r, err)
 	}
-	return
+
 }
